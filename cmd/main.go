@@ -92,7 +92,6 @@ func getNewAsteroid() {
 	}
 
 	a := as.Asteroid{
-		Active:           true,
 		Position:         position,
 		Speed:            as.GetSpeed(&target_pos, position),
 		Rotation:         0,
