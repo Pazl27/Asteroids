@@ -15,7 +15,7 @@ var (
 
   target_pos rl.Vector2
 
-  player pl.Ship
+  player = pl.Ship{Position: rl.Vector2{X: ScreenWidth/2, Y: ScreenHeight/2}, Speed: 0, Acceleration: 0.1, Rotation: 0}
 )
 
 const (
