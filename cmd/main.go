@@ -6,6 +6,7 @@ import (
 
 	as "example.com/asteroids/asteroids"
 	rl "github.com/gen2brain/raylib-go/raylib"
+  pl "example.com/asteroids/player"
 )
 
 var (
@@ -13,6 +14,8 @@ var (
   list_ast []as.Asteroid
 
   target_pos rl.Vector2
+
+  player pl.Ship
 )
 
 const (
@@ -30,23 +33,25 @@ func getRandomPos() {
     }
 }
 
-func main() {
-  rl.InitWindow(ScreenWidth, ScreenHeight, "Asteroids")
-	defer rl.CloseWindow()
+func draw() {
 
-	rl.SetTargetFPS(60)
+		rl.BeginDrawing()
+		rl.ClearBackground(rl.Black)
+    string := fmt.Sprintf("Asteroids: %d", len(list_ast))
+    rl.DrawText(string, 10, 10, 20, rl.White)
 
-	for !rl.WindowShouldClose() {
-    getRandomPos()
-
-    for i := len(list_ast) - 1; i >= 0; i-- {
-      ast_temp := list_ast[i]
-
-      if ast_temp.Position.X > float32(rl.GetScreenWidth()) || ast_temp.Position.X < 0 || ast_temp.Position.Y > float32(rl.GetScreenHeight()) || ast_temp.Position.Y < 0 {
-        list_ast = append(list_ast[:i], list_ast[i+1:]...)
-      }
+    for i := range list_ast {
+      as.UpdateAsteroid(&list_ast[i])
+      as.DrawAsteroid(&list_ast[i])
     }
 
+    player.UpdateShip()
+    player.DrawShip()
+
+		rl.EndDrawing()
+}
+
+func getNewAsteroid() {
     if rl.IsMouseButtonPressed(rl.MouseLeftButton) {
       size_rand := list_size[rand.Intn(len(list_size))]
 
@@ -61,17 +66,34 @@ func main() {
 
       list_ast = append(list_ast, a)
     }
+}
 
-		rl.BeginDrawing()
-		rl.ClearBackground(rl.Black)
-    string := fmt.Sprintf("Asteroids: %d", len(list_ast))
-    rl.DrawText(string, 10, 10, 20, rl.White)
+func checkBoarders() {
+    for i := len(list_ast) - 1; i >= 0; i-- {
+      ast_temp := list_ast[i]
 
-    for i := range list_ast {
-      as.UpdateAsteroid(&list_ast[i])
-      as.DrawAsteroid(&list_ast[i])
+      if ast_temp.Position.X > float32(rl.GetScreenWidth()) || ast_temp.Position.X < 0 || ast_temp.Position.Y > float32(rl.GetScreenHeight()) || ast_temp.Position.Y < 0 {
+        list_ast = append(list_ast[:i], list_ast[i+1:]...)
+      }
     }
+}
 
-		rl.EndDrawing()
+func main() {
+  player = pl.Ship{Position: rl.Vector2{X: 400, Y: 225}, Speed: 0, Acceleration: 0.1, Rotation: 0}
+
+  rl.InitWindow(ScreenWidth, ScreenHeight, "Asteroids")
+	defer rl.CloseWindow()
+
+	rl.SetTargetFPS(60)
+
+	for !rl.WindowShouldClose() {
+    getRandomPos()
+
+    checkBoarders()
+
+    getNewAsteroid()
+
+    draw()
+
 	}
 }
