@@ -1,26 +1,27 @@
 package player
 
 import (
-	"fmt"
 	"math"
 
 	rl "github.com/gen2brain/raylib-go/raylib"
 )
 
-const (
-	MAX_SPEED = 8.0
-)
+const MAX_SPEED = 6.0
 
 type Ship struct {
 	Position     rl.Vector2
 	Speed        float32
 	Acceleration float32
-	Rotation     float32
+	Rotation     float32 // in degrees
+	Bullets      []Bullet
 }
 
 func (ship *Ship) DrawShip() {
 	// Draw the ship using its position and rotation
 	rl.DrawPolyLines(ship.Position, 3, 16, ship.Rotation, rl.White)
+	for _, bullet := range ship.Bullets {
+		bullet.Draw()
+	}
 }
 
 func (ship *Ship) UpdateShip() {
@@ -51,9 +52,23 @@ func (ship *Ship) UpdateShip() {
 		ship.Speed = 0
 	}
 
-  if rl.IsKeyDown(rl.KeySpace) {
-    fmt.Println("Pew pew!")
+	// Shoot a bullet
+	if rl.IsKeyPressed(rl.KeySpace) {
+		newBullet := NewBullet(ship.Position, ship.Rotation) // Adjust the speed as needed
+		ship.Bullets = append(ship.Bullets, newBullet)
+	}
+
+  // Delete bullets that are out of bounds
+  for i := 0; i < len(ship.Bullets); i++ {
+    if ship.Bullets[i].DeleteBullet() {
+      ship.Bullets = append(ship.Bullets[:i], ship.Bullets[i+1:]...)
+    }
   }
+
+	// Update all bullets
+	for i := range ship.Bullets {
+		ship.Bullets[i].Update()
+	}
 
 	// Convert rotation to radians
 	rotationRadians := ship.Rotation * (math.Pi / 180.0)

@@ -19,8 +19,8 @@ var (
 )
 
 const (
-  ScreenWidth = 800
-  ScreenHeight = 450
+  ScreenWidth = 1000
+  ScreenHeight = 800
 )
 
 func getRandomPos() {
@@ -39,6 +39,8 @@ func draw() {
 		rl.ClearBackground(rl.Black)
     string := fmt.Sprintf("Asteroids: %d", len(list_ast))
     rl.DrawText(string, 10, 10, 20, rl.White)
+    string = fmt.Sprintf("Bullets: %d", len(player.Bullets))
+    rl.DrawText(string, 10, 30, 20, rl.White)
 
     for i := range list_ast {
       as.UpdateAsteroid(&list_ast[i])
