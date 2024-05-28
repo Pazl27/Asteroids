@@ -5,42 +5,37 @@ import (
 )
 
 const (
-  SMALL = 1
-  MEDIUM = 2
-  LARGE = 4
-  SPEED = 2
+	SMALL  = 1
+	MEDIUM = 2
+	LARGE  = 4
+
+	SPEED  = 2
 )
 
 type Asteroid struct {
-  Active bool
+	Position         rl.Vector2
+	Speed            rl.Vector2
+	Rotation         float32
+	RoatatationSpeed float32
 
-  Position rl.Vector2
-  Speed rl.Vector2
-  Rotation float32
-  RoatatationSpeed float32
-
-  Size int
+	Size int
 }
 
 func DrawAsteroid(asteroid *Asteroid) {
-  if asteroid.Active {
-    rl.DrawPolyLines(asteroid.Position, 3, float32(16 * asteroid.Size), asteroid.Rotation, rl.White)
-  }
+	rl.DrawPolyLines(asteroid.Position, 3, float32(16*asteroid.Size), asteroid.Rotation, rl.White)
 }
 
 func UpdateAsteroid(asteroid *Asteroid) {
-  if asteroid.Active {
-    asteroid.Position.X += asteroid.Speed.X
-    asteroid.Position.Y += asteroid.Speed.Y
-    asteroid.Rotation += asteroid.RoatatationSpeed
-  }
+	asteroid.Position.X += asteroid.Speed.X
+	asteroid.Position.Y += asteroid.Speed.Y
+	asteroid.Rotation += asteroid.RoatatationSpeed
 }
 
 func GetSpeed(target *rl.Vector2, position rl.Vector2) rl.Vector2 {
-  speed := rl.Vector2{X: target.X - position.X, Y: target.Y - position.Y}
-  speed = rl.Vector2Normalize(speed)
-  speed.X *= SPEED
-  speed.Y *= SPEED
+	speed := rl.Vector2{X: target.X - position.X, Y: target.Y - position.Y}
+	speed = rl.Vector2Normalize(speed)
+	speed.X *= SPEED
+	speed.Y *= SPEED
 
-  return speed
+	return speed
 }
