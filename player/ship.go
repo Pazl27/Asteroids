@@ -16,9 +16,15 @@ type Ship struct {
 	Bullets      []Bullet
 }
 
-func (ship *Ship) DrawShip() {
+func (ship *Ship) DrawShip(image string) {
+  texture := rl.LoadTexture(image)
 	// Draw the ship using its position and rotation
-	rl.DrawPolyLines(ship.Position, 3, 16, ship.Rotation, rl.White)
+	// rl.DrawPolyLines(ship.Position, 3, 16, ship.Rotation, rl.White)
+  source := rl.Rectangle{X: 0, Y: 0, Width: 32, Height: 48}
+  dest := rl.Rectangle{X: ship.Position.X, Y: ship.Position.Y, Width: 48, Height: 48}
+  origin := rl.Vector2{X: dest.Width / 2, Y: dest.Height / 2}
+  rl.DrawTexturePro(texture, source, dest, origin, ship.Rotation + 90, rl.White)
+
 	for _, bullet := range ship.Bullets {
 		bullet.Draw()
 	}
@@ -58,12 +64,12 @@ func (ship *Ship) UpdateShip() {
 		ship.Bullets = append(ship.Bullets, newBullet)
 	}
 
-  // Delete bullets that are out of bounds
-  for i := 0; i < len(ship.Bullets); i++ {
-    if ship.Bullets[i].DeleteBullet() {
-      ship.Bullets = append(ship.Bullets[:i], ship.Bullets[i+1:]...)
-    }
-  }
+	// Delete bullets that are out of bounds
+	for i := 0; i < len(ship.Bullets); i++ {
+		if ship.Bullets[i].DeleteBullet() {
+			ship.Bullets = append(ship.Bullets[:i], ship.Bullets[i+1:]...)
+		}
+	}
 
 	// Update all bullets
 	for i := range ship.Bullets {
@@ -83,4 +89,3 @@ func (ship *Ship) UpdateShip() {
 	ship.Position.X += direction.X * ship.Speed
 	ship.Position.Y += direction.Y * ship.Speed
 }
-

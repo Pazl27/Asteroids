@@ -15,7 +15,15 @@ var (
 
   target_pos rl.Vector2
 
-  player = pl.Ship{Position: rl.Vector2{X: ScreenWidth/2, Y: ScreenHeight/2}, Speed: 0, Acceleration: 0.1, Rotation: 0}
+
+
+  player = pl.Ship{
+    Position: rl.Vector2{X: ScreenWidth/2,
+      Y: ScreenHeight/2},
+    Speed: 0,
+    Acceleration: 0.1,
+    Rotation: 0,
+  }
 )
 
 const (
@@ -48,7 +56,7 @@ func draw() {
     }
 
     player.UpdateShip()
-    player.DrawShip()
+    player.DrawShip("assets/ship.png")
 
 		rl.EndDrawing()
 }
