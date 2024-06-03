@@ -12,7 +12,7 @@ A simple game of asteroids made with go and raylib.
 
 ## Installation
 - clone the repository
-````bash
+```bash
 $ git clone https://github.com/Pazl27/Asteroids.git
 ```
 - make sure you have go installed
