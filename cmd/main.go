@@ -124,11 +124,10 @@ func checkPlayerCollision() {
 
 	for i := range list_ast {
 		asteroid := list_ast[i]
-		asteroidRadius := float32(asteroid.Size*2) / 2
+		asteroidRadius := float32(asteroid.Size * 8) // Update radius based on asteroid size
 
 		distance := rl.Vector2Distance(player.Position, asteroid.Position)
 		if distance < playerRadius+asteroidRadius {
-			fmt.Println("Collision detected!")
 			gameRunning = false
 		}
 	}
