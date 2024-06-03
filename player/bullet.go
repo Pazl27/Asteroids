@@ -6,7 +6,7 @@ import (
 	rl "github.com/gen2brain/raylib-go/raylib"
 )
 
-const speed = 7.0
+const speed = 8.0
 
 type Bullet struct {
 	Position  rl.Vector2
