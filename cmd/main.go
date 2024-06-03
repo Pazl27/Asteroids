@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"math/rand"
+	"os"
 
 	as "example.com/asteroids/asteroids"
 	pl "example.com/asteroids/player"
@@ -25,7 +26,7 @@ var (
 		Rotation:     0,
 	}
 
-	gameState = true
+	gameRunning = false
 
 	score float32 = 0.0
 )
@@ -46,16 +47,18 @@ func getRandomPos() {
 	}
 }
 
-func draw() {
+func drawGame() {
 
 	rl.BeginDrawing()
 	rl.ClearBackground(rl.Black)
 	score_string := fmt.Sprintf("Score: %d", int(score))
 	rl.DrawText(score_string, 10, 10, 20, rl.White)
-	// string := fmt.Sprintf("Asteroids: %d", len(list_ast))
-	// rl.DrawText(string, 10, 10, 20, rl.White)
-	// string = fmt.Sprintf("Bullets: %d", len(player.Bullets))
-	// rl.DrawText(string, 10, 30, 20, rl.White)
+  /*
+	string := fmt.Sprintf("Asteroids: %d", len(list_ast))
+	rl.DrawText(string, 10, 10, 20, rl.White)
+	string = fmt.Sprintf("Bullets: %d", len(player.Bullets))
+	rl.DrawText(string, 10, 30, 20, rl.White)
+  */
 
 	for i := range list_ast {
 		as.UpdateAsteroid(&list_ast[i])
@@ -126,7 +129,7 @@ func checkPlayerCollision() {
 		distance := rl.Vector2Distance(player.Position, asteroid.Position)
 		if distance < playerRadius+asteroidRadius {
 			fmt.Println("Collision detected!")
-			gameState = false
+			gameRunning = false
 		}
 	}
 }
@@ -137,16 +140,16 @@ func checkBulletCollision() {
 
 		for j := len(list_ast) - 1; j >= 0; j-- {
 			asteroid := list_ast[j]
-			
+
 			// Check for collision
 			distance := rl.Vector2Distance(bullet.Position, asteroid.Position)
 			if distance < 5+float32(asteroid.Size*8) { // Assuming bullet radius is 5 and asteroid radius is size*8
 				// Remove the bullet
 				player.Bullets = append(player.Bullets[:i], player.Bullets[i+1:]...)
-				
+
 				// Remove the asteroid
 				list_ast = append(list_ast[:j], list_ast[j+1:]...)
-				
+
 				// Update the score based on the size of the asteroid
 				switch asteroid.Size {
 				case as.SMALL:
@@ -156,7 +159,7 @@ func checkBulletCollision() {
 				case as.LARGE:
 					score += 30
 				}
-				
+
 				// Break the inner loop as the bullet is already removed
 				break
 			}
@@ -169,7 +172,7 @@ func checkCollisions() {
 	checkBulletCollision()
 }
 
-func main() {
+func resetGame() {
 	player = pl.Ship{
 		Position:     rl.Vector2{X: 400, Y: 225},
 		Speed:        0,
@@ -177,18 +180,50 @@ func main() {
 		Rotation:     0,
 	}
 
+	list_ast = nil
+	score = 0
+	gameRunning = true
+}
+
+func drawMenu() {
+	rl.BeginDrawing()
+	rl.ClearBackground(rl.Black)
+	rl.DrawText("Press 'Enter' to start", ScreenWidth/2-100, ScreenHeight/2, 20, rl.White)
+	rl.DrawText("Asteroids", ScreenWidth/2-100, ScreenHeight/2-50, 40, rl.White)
+	rl.DrawText("Score: "+fmt.Sprintf("%d", int(score)), ScreenWidth/2-100, ScreenHeight/2+50, 20, rl.White)
+	rl.DrawText("Press 'Q' to quit", ScreenWidth/2-100, ScreenHeight/2+100, 20, rl.White)
+	rl.EndDrawing()
+
+	processInput()
+}
+
+func processInput() {
+	if rl.IsKeyPressed(rl.KeyEnter) {
+		resetGame()
+	}
+
+	if rl.IsKeyPressed(rl.KeyQ) {
+		os.Exit(0)
+	}
+}
+
+func main() {
 	rl.InitWindow(ScreenWidth, ScreenHeight, "Asteroids")
 	defer rl.CloseWindow()
 
 	rl.SetTargetFPS(60)
 
-	for !rl.WindowShouldClose() && gameState {
+	for !rl.WindowShouldClose() {
 
-		score += rl.GetFrameTime()
-		getRandomPos()
-		checkBoarders()
-		getNewAsteroid()
-		checkCollisions()
-		draw()
+		if !gameRunning {
+			drawMenu()
+		} else {
+			score += rl.GetFrameTime()
+			getRandomPos()
+			checkBoarders()
+			getNewAsteroid()
+			checkCollisions()
+			drawGame()
+		}
 	}
 }
