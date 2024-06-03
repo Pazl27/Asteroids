@@ -20,7 +20,7 @@ $ git clone https://github.com/Pazl27/Asteroids.git
 $ go --verions
 ```
 - run the game with go
-````bash
+```bash
 $ go run cmd/main.go
 ```
 - this step can take a while, as go will download all the dependencies
