@@ -29,6 +29,7 @@ var (
 	gameRunning = false
 
 	score float32 = 0.0
+
 )
 
 const (
