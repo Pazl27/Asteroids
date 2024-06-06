@@ -12,6 +12,7 @@ import (
 )
 
 type HighScore struct {
+  Name string `json:"name"`
 	Score int `json:"score"`
 }
 
@@ -38,6 +39,8 @@ var (
 	highscore HighScore
 
   ast_added int = 0
+
+  playerName string = "unknown"
 )
 
 const (
@@ -200,6 +203,8 @@ func drawMenu() {
 	rl.DrawText("Score: "+fmt.Sprintf("%d", int(score)), ScreenWidth/2-100, ScreenHeight/2+50, 20, rl.White)
 	rl.DrawText("Highscore: "+fmt.Sprintf("%d", highscore.Score), ScreenWidth/2-100, ScreenHeight/2+75, 20, rl.White)
 	rl.DrawText("Press 'Q' to quit", ScreenWidth/2-100, ScreenHeight/2+100, 20, rl.White)
+  // TODO: Add input for player name 
+
 	rl.EndDrawing()
 
 	processInput()
@@ -246,6 +251,7 @@ func checkHighScore() {
 
 func saveHighScore() error {
 	highscore.Score = int(score)
+	highscore.Name = playerName
 	file, err := os.Create("highscore.json")
 	if err != nil {
 		return fmt.Errorf("failed to create file: %w", err)
@@ -280,4 +286,3 @@ func main() {
 		}
 	}
 }
-
