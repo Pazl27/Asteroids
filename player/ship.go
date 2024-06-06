@@ -14,6 +14,10 @@ type Ship struct {
 	Acceleration float32
 	Rotation     float32 // in degrees
 	Bullets      []Bullet
+
+  Invincible bool
+  InfiniteAmmo bool
+
 }
 
 func (ship *Ship) DrawShip(image string) {
@@ -59,9 +63,14 @@ func (ship *Ship) UpdateShip() {
 	}
 
 	// Shoot a bullet
-	if rl.IsKeyPressed(rl.KeySpace) {
+  if ship.InfiniteAmmo && rl.IsKeyDown(rl.KeySpace) {
+    newBullet := NewBullet(ship.Position, ship.Rotation) // Adjust the speed as needed
+    ship.Bullets = append(ship.Bullets, newBullet)
+
+  } else if rl.IsKeyPressed(rl.KeySpace) {
 		newBullet := NewBullet(ship.Position, ship.Rotation) // Adjust the speed as needed
 		ship.Bullets = append(ship.Bullets, newBullet)
+
 	}
 
 	// Delete bullets that are out of bounds

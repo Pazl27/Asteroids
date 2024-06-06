@@ -20,6 +20,7 @@ type Asteroid struct {
 	RoatatationSpeed float32
 
 	Size int
+  Split bool
 }
 
 func DrawAsteroid(asteroid *Asteroid) {
@@ -67,6 +68,7 @@ func SplitAsteroid(ast Asteroid, list_ast *[]Asteroid) {
             Rotation: float32(rand.Intn(360)), // Random initial rotation
             RoatatationSpeed: float32(rand.Intn(5) - 2), // Random rotation speed
             Size:     newSize,
+            Split:    true,
         }
 
         *list_ast = append(*list_ast, new_ast)

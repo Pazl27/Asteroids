@@ -7,13 +7,14 @@ import (
 	"os"
 
 	as "example.com/asteroids/asteroids"
+	it "example.com/asteroids/items"
 	pl "example.com/asteroids/player"
 	rl "github.com/gen2brain/raylib-go/raylib"
 )
 
 type HighScore struct {
-  Name string `json:"name"`
-	Score int `json:"score"`
+	Name  string `json:"name"`
+	Score int    `json:"score"`
 }
 
 var (
@@ -38,9 +39,15 @@ var (
 
 	highscore HighScore
 
-  ast_added int = 0
+	ast_added int = 0
 
-  playerName string = "unknown"
+	playerName string = "unknown"
+
+	item it.Item = nil
+
+	lastItemSpawnTime float64 // Track the last item spawn time
+
+	itemEffectStartTimes = make(map[string]float64) // Track when item effects start
 )
 
 const (
@@ -64,6 +71,10 @@ func drawGame() {
 	rl.ClearBackground(rl.Black)
 	score_string := fmt.Sprintf("Score: %d", int(score))
 	rl.DrawText(score_string, 10, 10, 20, rl.White)
+
+	if item != nil {
+		item.Draw()
+	}
 
 	for i := range list_ast {
 		as.UpdateAsteroid(&list_ast[i])
@@ -112,7 +123,7 @@ func getNewAsteroid() {
 	}
 
 	list_ast = append(list_ast, a)
-  ast_added++;
+	ast_added++
 }
 
 func checkBoarders() {
@@ -121,21 +132,23 @@ func checkBoarders() {
 
 		if ast_temp.Position.X > float32(rl.GetScreenWidth()) || ast_temp.Position.X < 0 || ast_temp.Position.Y > float32(rl.GetScreenHeight()) || ast_temp.Position.Y < 0 {
 			list_ast = append(list_ast[:i], list_ast[i+1:]...)
-      ast_added--;
+			ast_added--
 		}
 	}
 }
 
 func checkPlayerCollision() {
-	playerRadius := float32(PLAYER_WIDTH) / 2
+	if !player.Invincible {
+		playerRadius := float32(PLAYER_WIDTH) / 2
 
-	for i := range list_ast {
-		asteroid := list_ast[i]
-		asteroidRadius := float32(asteroid.Size * 8) // Update radius based on asteroid size
+		for i := range list_ast {
+			asteroid := list_ast[i]
+			asteroidRadius := float32(asteroid.Size * 8) // Update radius based on asteroid size
 
-		distance := rl.Vector2Distance(player.Position, asteroid.Position)
-		if distance < playerRadius+asteroidRadius {
-			gameRunning = false
+			distance := rl.Vector2Distance(player.Position, asteroid.Position)
+			if distance < playerRadius+asteroidRadius {
+				gameRunning = false
+			}
 		}
 	}
 }
@@ -153,8 +166,8 @@ func checkBulletCollision() {
 				// Remove the bullet
 				player.Bullets = append(player.Bullets[:i], player.Bullets[i+1:]...)
 
-        // Split the asteroid
-        as.SplitAsteroid(asteroid, &list_ast)
+				// Split the asteroid
+				as.SplitAsteroid(asteroid, &list_ast)
 
 				// Remove the asteroid
 				list_ast = append(list_ast[:j], list_ast[j+1:]...)
@@ -176,14 +189,41 @@ func checkBulletCollision() {
 	}
 }
 
+func checkItemCollision() {
+	if item != nil {
+		distance := rl.Vector2Distance(player.Position, item.GetPosition())
+		if distance < 20 {
+			item.ApplyEffect(&player)
+			itemEffectStartTimes[item.GetName()] = rl.GetTime() // Record when the effect starts
+			item = nil
+		}
+	}
+}
+
+func disableExpiredEffects() {
+	currentTime := rl.GetTime()
+	for effect, startTime := range itemEffectStartTimes {
+		if currentTime-startTime >= 5 {
+			switch effect {
+			case "Invincible":
+				player.Invincible = false
+			case "InfiniteAmmo":
+				player.InfiniteAmmo = false
+			}
+			delete(itemEffectStartTimes, effect) // Remove the effect once it's expired
+		}
+	}
+}
+
 func checkCollisions() {
+	checkItemCollision()
 	checkPlayerCollision()
 	checkBulletCollision()
 }
 
 func resetGame() {
 	player = pl.Ship{
-		Position:     rl.Vector2{X: 400, Y: 225},
+		Position:     rl.Vector2{X: ScreenWidth / 2, Y: ScreenHeight / 2},
 		Speed:        0,
 		Acceleration: 0.1,
 		Rotation:     0,
@@ -192,7 +232,9 @@ func resetGame() {
 	list_ast = nil
 	score = 0
 	gameRunning = true
-  ast_added = 0
+	ast_added = 0
+	lastItemSpawnTime = rl.GetTime()
+	itemEffectStartTimes = make(map[string]float64)
 }
 
 func drawMenu() {
@@ -203,7 +245,7 @@ func drawMenu() {
 	rl.DrawText("Score: "+fmt.Sprintf("%d", int(score)), ScreenWidth/2-100, ScreenHeight/2+50, 20, rl.White)
 	rl.DrawText("Highscore: "+fmt.Sprintf("%d", highscore.Score), ScreenWidth/2-100, ScreenHeight/2+75, 20, rl.White)
 	rl.DrawText("Press 'Q' to quit", ScreenWidth/2-100, ScreenHeight/2+100, 20, rl.White)
-  // TODO: Add input for player name 
+	// TODO: Add input for player name
 
 	rl.EndDrawing()
 
@@ -221,7 +263,7 @@ func processInput() {
 }
 
 func init() {
-  decodeHighScore()
+	decodeHighScore()
 }
 
 func decodeHighScore() {
@@ -272,6 +314,8 @@ func main() {
 
 	rl.SetTargetFPS(60)
 
+	lastItemSpawnTime = rl.GetTime()
+
 	for !rl.WindowShouldClose() {
 		if !gameRunning {
 			checkHighScore()
@@ -282,7 +326,15 @@ func main() {
 			checkBoarders()
 			getNewAsteroid()
 			checkCollisions()
+			disableExpiredEffects()
 			drawGame()
+
+			// Check if 10 seconds have passed since the last item was spawned
+			if rl.GetTime()-lastItemSpawnTime >= 10 {
+				item = it.SpawnItem()
+				lastItemSpawnTime = rl.GetTime()
+			}
 		}
 	}
 }
+

@@ -39,6 +39,7 @@ $ go run cmd/main.go
 - [ ] add music
 - [ ] add sound effects
 - [x] highscore system
+- [x] powerups
 - [ ] asteroid sprites
 - [ ] background image 
 - [ ] add lives
