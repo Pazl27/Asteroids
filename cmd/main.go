@@ -36,7 +36,6 @@ var (
 	gameRunning = false
 
 	score float32 = 0.0
-
 	highscore HighScore
 
 	ast_added int = 0
@@ -44,9 +43,7 @@ var (
 	playerName string = "unknown"
 
 	item it.Item = nil
-
 	lastItemSpawnTime float64 // Track the last item spawn time
-
 	itemEffectStartTimes = make(map[string]float64) // Track when item effects start
 )
 
@@ -88,7 +85,7 @@ func drawGame() {
 }
 
 func getNewAsteroid() {
-	if ast_added >= 10 {
+	if ast_added >= 15 {
 		return
 	}
 
