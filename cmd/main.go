@@ -36,6 +36,8 @@ var (
 	score float32 = 0.0
 
 	highscore HighScore
+
+  ast_added int = 0
 )
 
 const (
@@ -72,7 +74,7 @@ func drawGame() {
 }
 
 func getNewAsteroid() {
-	if len(list_ast) >= 10 {
+	if ast_added >= 10 {
 		return
 	}
 
@@ -107,6 +109,7 @@ func getNewAsteroid() {
 	}
 
 	list_ast = append(list_ast, a)
+  ast_added++;
 }
 
 func checkBoarders() {
@@ -115,6 +118,7 @@ func checkBoarders() {
 
 		if ast_temp.Position.X > float32(rl.GetScreenWidth()) || ast_temp.Position.X < 0 || ast_temp.Position.Y > float32(rl.GetScreenHeight()) || ast_temp.Position.Y < 0 {
 			list_ast = append(list_ast[:i], list_ast[i+1:]...)
+      ast_added--;
 		}
 	}
 }
@@ -145,6 +149,9 @@ func checkBulletCollision() {
 			if distance < 5+float32(asteroid.Size*8) { // Assuming bullet radius is 5 and asteroid radius is size*8
 				// Remove the bullet
 				player.Bullets = append(player.Bullets[:i], player.Bullets[i+1:]...)
+
+        // Split the asteroid
+        as.SplitAsteroid(asteroid, &list_ast)
 
 				// Remove the asteroid
 				list_ast = append(list_ast[:j], list_ast[j+1:]...)
@@ -182,6 +189,7 @@ func resetGame() {
 	list_ast = nil
 	score = 0
 	gameRunning = true
+  ast_added = 0
 }
 
 func drawMenu() {

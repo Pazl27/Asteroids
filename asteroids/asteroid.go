@@ -2,6 +2,7 @@ package asteroids
 
 import (
 	rl "github.com/gen2brain/raylib-go/raylib"
+  "math/rand"
 )
 
 const (
@@ -39,3 +40,36 @@ func GetSpeed(target *rl.Vector2, position rl.Vector2) rl.Vector2 {
 
 	return speed
 }
+
+func SplitAsteroid(ast Asteroid, list_ast *[]Asteroid) {
+    if ast.Size == SMALL {
+        return
+    }
+
+    newSize := SMALL
+    if ast.Size == LARGE {
+        newSize = MEDIUM
+    }
+
+    for i := 0; i < 2; i++ {
+        // Generate a random direction vector
+        direction := rl.Vector2{
+            X: rand.Float32()*2 - 1,
+            Y: rand.Float32()*2 - 1,
+        }
+        direction = rl.Vector2Normalize(direction)
+        direction.X *= SPEED
+        direction.Y *= SPEED
+
+        new_ast := Asteroid{
+            Position: ast.Position,
+            Speed:    direction,
+            Rotation: float32(rand.Intn(360)), // Random initial rotation
+            RoatatationSpeed: float32(rand.Intn(5) - 2), // Random rotation speed
+            Size:     newSize,
+        }
+
+        *list_ast = append(*list_ast, new_ast)
+    }
+}
+
