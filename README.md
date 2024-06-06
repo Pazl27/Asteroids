@@ -38,7 +38,7 @@ $ go run cmd/main.go
 - [ ] spawn new asteroids when one is destroyed
 - [ ] add music
 - [ ] add sound effects
-- [ ] highscore system
+- [x] highscore system
 - [ ] asteroid sprites
 - [ ] background image 
 - [ ] add lives
