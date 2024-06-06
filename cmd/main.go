@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"math/rand"
 	"os"
@@ -9,6 +10,10 @@ import (
 	pl "example.com/asteroids/player"
 	rl "github.com/gen2brain/raylib-go/raylib"
 )
+
+type HighScore struct {
+	Score int `json:"score"`
+}
 
 var (
 	list_size [3]int = [3]int{as.SMALL, as.MEDIUM, as.LARGE}
@@ -30,6 +35,7 @@ var (
 
 	score float32 = 0.0
 
+	highscore HighScore
 )
 
 const (
@@ -49,17 +55,10 @@ func getRandomPos() {
 }
 
 func drawGame() {
-
 	rl.BeginDrawing()
 	rl.ClearBackground(rl.Black)
 	score_string := fmt.Sprintf("Score: %d", int(score))
 	rl.DrawText(score_string, 10, 10, 20, rl.White)
-  /*
-	string := fmt.Sprintf("Asteroids: %d", len(list_ast))
-	rl.DrawText(string, 10, 10, 20, rl.White)
-	string = fmt.Sprintf("Bullets: %d", len(player.Bullets))
-	rl.DrawText(string, 10, 30, 20, rl.White)
-  */
 
 	for i := range list_ast {
 		as.UpdateAsteroid(&list_ast[i])
@@ -191,6 +190,7 @@ func drawMenu() {
 	rl.DrawText("Press 'Enter' to start", ScreenWidth/2-100, ScreenHeight/2, 20, rl.White)
 	rl.DrawText("Asteroids", ScreenWidth/2-100, ScreenHeight/2-50, 40, rl.White)
 	rl.DrawText("Score: "+fmt.Sprintf("%d", int(score)), ScreenWidth/2-100, ScreenHeight/2+50, 20, rl.White)
+	rl.DrawText("Highscore: "+fmt.Sprintf("%d", highscore.Score), ScreenWidth/2-100, ScreenHeight/2+75, 20, rl.White)
 	rl.DrawText("Press 'Q' to quit", ScreenWidth/2-100, ScreenHeight/2+100, 20, rl.White)
 	rl.EndDrawing()
 
@@ -207,6 +207,51 @@ func processInput() {
 	}
 }
 
+func init() {
+  decodeHighScore()
+}
+
+func decodeHighScore() {
+	file, err := os.Open("highscore.json")
+	if err != nil {
+		fmt.Println("Error opening highscore file:", err)
+		return
+	}
+	defer file.Close()
+
+	decoder := json.NewDecoder(file)
+	highscore = HighScore{}
+	err = decoder.Decode(&highscore)
+	if err != nil {
+		fmt.Println("Error decoding highscore:", err)
+	}
+}
+
+func checkHighScore() {
+	if int(score) > highscore.Score {
+		err := saveHighScore()
+		if err != nil {
+			fmt.Println(err)
+		}
+	}
+}
+
+func saveHighScore() error {
+	highscore.Score = int(score)
+	file, err := os.Create("highscore.json")
+	if err != nil {
+		return fmt.Errorf("failed to create file: %w", err)
+	}
+	defer file.Close()
+
+	encoder := json.NewEncoder(file)
+	if err := encoder.Encode(highscore); err != nil {
+		return fmt.Errorf("failed to encode highscore: %w", err)
+	}
+
+	return nil
+}
+
 func main() {
 	rl.InitWindow(ScreenWidth, ScreenHeight, "Asteroids")
 	defer rl.CloseWindow()
@@ -214,8 +259,8 @@ func main() {
 	rl.SetTargetFPS(60)
 
 	for !rl.WindowShouldClose() {
-
 		if !gameRunning {
+			checkHighScore()
 			drawMenu()
 		} else {
 			score += rl.GetFrameTime()
@@ -227,3 +272,4 @@ func main() {
 		}
 	}
 }
+
