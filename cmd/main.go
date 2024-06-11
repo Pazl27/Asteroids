@@ -35,15 +35,15 @@ var (
 
 	gameRunning = false
 
-	score float32 = 0.0
+	score     float32 = 0.0
 	highscore HighScore
 
 	ast_added int = 0
 
 	playerName string = "unknown"
 
-	item it.Item = nil
-	lastItemSpawnTime float64 // Track the last item spawn time
+	item                 it.Item                    = nil
+	lastItemSpawnTime    float64                    // Track the last item spawn time
 	itemEffectStartTimes = make(map[string]float64) // Track when item effects start
 )
 
@@ -68,6 +68,13 @@ func drawGame() {
 	rl.ClearBackground(rl.Black)
 	score_string := fmt.Sprintf("Score: %d", int(score))
 	rl.DrawText(score_string, 10, 10, 20, rl.White)
+	// Powerup timer display
+	for effect, startTime := range itemEffectStartTimes {
+		timeLeft := 5 - (rl.GetTime() - startTime)
+		if timeLeft > 0 {
+			rl.DrawText(fmt.Sprintf("%s: %.2f", effect, timeLeft), 10, 30, 20, rl.White)
+		}
+	}
 
 	if item != nil {
 		item.Draw()
@@ -334,4 +341,3 @@ func main() {
 		}
 	}
 }
-
