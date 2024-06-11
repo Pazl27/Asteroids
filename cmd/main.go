@@ -25,13 +25,7 @@ var (
 
 	lastSpawnTime float64
 
-	player = pl.Ship{
-		Position: rl.Vector2{X: ScreenWidth / 2,
-			Y: ScreenHeight / 2},
-		Speed:        0,
-		Acceleration: 0.1,
-		Rotation:     0,
-	}
+  player = pl.NewShip()
 
 	gameRunning = false
 
@@ -45,6 +39,7 @@ var (
 	item                 it.Item                    = nil
 	lastItemSpawnTime    float64                    // Track the last item spawn time
 	itemEffectStartTimes = make(map[string]float64) // Track when item effects start
+
 )
 
 const (
@@ -63,9 +58,13 @@ func getRandomPos() {
 	}
 }
 
-func drawGame() {
+func drawGame(background_texture rl.Texture2D) {
 	rl.BeginDrawing()
 	rl.ClearBackground(rl.Black)
+
+  // background image
+  rl.DrawTexture(background_texture, 0, 0, rl.White)
+
 	score_string := fmt.Sprintf("Score: %d", int(score))
 	rl.DrawText(score_string, 10, 10, 20, rl.White)
 	// Powerup timer display
@@ -226,12 +225,7 @@ func checkCollisions() {
 }
 
 func resetGame() {
-	player = pl.Ship{
-		Position:     rl.Vector2{X: ScreenWidth / 2, Y: ScreenHeight / 2},
-		Speed:        0,
-		Acceleration: 0.1,
-		Rotation:     0,
-	}
+  player = pl.NewShip()
 
 	list_ast = nil
 	score = 0
@@ -268,6 +262,7 @@ func processInput() {
 
 func init() {
 	decodeHighScore()
+
 }
 
 func decodeHighScore() {
@@ -312,11 +307,21 @@ func saveHighScore() error {
 	return nil
 }
 
+func loadTextures() rl.Texture2D {
+  background := rl.LoadImage("assets/background_3.jpg")
+  rl.ImageResize(background, ScreenWidth, ScreenHeight)
+  background_texture := rl.LoadTextureFromImage(background)
+
+  return background_texture
+}
+
 func main() {
 	rl.InitWindow(ScreenWidth, ScreenHeight, "Asteroids")
 	defer rl.CloseWindow()
 
 	rl.SetTargetFPS(60)
+
+  background_texture := loadTextures()
 
 	lastItemSpawnTime = rl.GetTime()
 
@@ -331,7 +336,7 @@ func main() {
 			getNewAsteroid()
 			checkCollisions()
 			disableExpiredEffects()
-			drawGame()
+			drawGame(background_texture)
 
 			// Check if 10 seconds have passed since the last item was spawned
 			if rl.GetTime()-lastItemSpawnTime >= 10 {

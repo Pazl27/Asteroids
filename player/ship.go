@@ -13,6 +13,7 @@ type Ship struct {
 	Speed        float32
 	Acceleration float32
 	Rotation     float32 // in degrees
+
 	Bullets      []Bullet
 
   Invincible bool
@@ -21,7 +22,7 @@ type Ship struct {
 }
 
 func (ship *Ship) DrawShip(image string) {
-	texture := rl.LoadTexture(image)
+  texture := rl.LoadTexture(image)
 	// Draw the ship using its position and rotation
 	// rl.DrawPolyLines(ship.Position, 3, 16, ship.Rotation, rl.White)
 	source := rl.Rectangle{X: 0, Y: 0, Width: 32, Height: 48}
@@ -31,6 +32,19 @@ func (ship *Ship) DrawShip(image string) {
 
 	for _, bullet := range ship.Bullets {
 		bullet.Draw()
+	}
+}
+
+func NewShip() Ship {
+
+	return Ship{
+		Position: rl.Vector2{
+      X: float32(rl.GetScreenWidth() / 2),
+			Y: float32(rl.GetScreenHeight() / 2),
+    },
+		Speed:        0,
+		Acceleration: 0.1,
+		Rotation:     0,
 	}
 }
 
