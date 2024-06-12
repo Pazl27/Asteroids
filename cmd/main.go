@@ -6,10 +6,10 @@ import (
 	"math/rand"
 	"os"
 
+  rl "github.com/gen2brain/raylib-go/raylib"
 	as "example.com/asteroids/asteroids"
 	it "example.com/asteroids/items"
 	pl "example.com/asteroids/player"
-	rl "github.com/gen2brain/raylib-go/raylib"
 )
 
 type HighScore struct {
