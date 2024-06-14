@@ -18,7 +18,18 @@ type Ship struct {
 
   Invincible bool
   InfiniteAmmo bool
+}
 
+func NewShip() Ship {
+  return Ship{
+    Position: rl.Vector2{
+      X: float32(rl.GetScreenWidth() / 2),
+      Y: float32(rl.GetScreenHeight() / 2),
+    },
+    Speed:        0,
+    Acceleration: 0.1,
+    Rotation:     0,
+  }
 }
 
 func (ship *Ship) DrawShip(image string) {
@@ -35,20 +46,43 @@ func (ship *Ship) DrawShip(image string) {
 	}
 }
 
-func NewShip() Ship {
+func (ship *Ship) UpdateShip() {
+  
+  // processes key inputs
+  ship.processInput()
+	// Delete bullets that are out of bounds
+	for i := 0; i < len(ship.Bullets); i++ {
+		if ship.Bullets[i].DeleteBullet() {
+			ship.Bullets = append(ship.Bullets[:i], ship.Bullets[i+1:]...)
+		}
+	}
 
-	return Ship{
-		Position: rl.Vector2{
-      X: float32(rl.GetScreenWidth() / 2),
-			Y: float32(rl.GetScreenHeight() / 2),
-    },
-		Speed:        0,
-		Acceleration: 0.1,
-		Rotation:     0,
+	// Update all bullets
+	for i := range ship.Bullets {
+		ship.Bullets[i].Update()
+	}
+
+	rotationRadians := ship.Rotation * (math.Pi / 180.0)
+
+	// Calculate direction vector based on rotation
+	direction := rl.Vector2{
+		X: float32(math.Cos(float64(rotationRadians))),
+		Y: float32(math.Sin(float64(rotationRadians))),
+	}
+
+	// Calculate new position based on speed and direction
+	newPosition := rl.Vector2{
+		X: ship.Position.X + direction.X*ship.Speed,
+		Y: ship.Position.Y + direction.Y*ship.Speed,
+	}
+
+	// Update position if it's within screen bounds
+	if inScreenBounds(newPosition) {
+		ship.Position = newPosition
 	}
 }
 
-func (ship *Ship) UpdateShip() {
+func (ship *Ship)processInput() {
 	// Handle acceleration and deceleration
 	if rl.IsKeyDown(rl.KeyW) {
 		ship.Speed += ship.Acceleration
@@ -84,39 +118,6 @@ func (ship *Ship) UpdateShip() {
   } else if rl.IsKeyPressed(rl.KeySpace) {
 		newBullet := NewBullet(ship.Position, ship.Rotation) // Adjust the speed as needed
 		ship.Bullets = append(ship.Bullets, newBullet)
-
-	}
-
-	// Delete bullets that are out of bounds
-	for i := 0; i < len(ship.Bullets); i++ {
-		if ship.Bullets[i].DeleteBullet() {
-			ship.Bullets = append(ship.Bullets[:i], ship.Bullets[i+1:]...)
-		}
-	}
-
-	// Update all bullets
-	for i := range ship.Bullets {
-		ship.Bullets[i].Update()
-	}
-
-	// Convert rotation to radians
-	rotationRadians := ship.Rotation * (math.Pi / 180.0)
-
-	// Calculate direction vector based on rotation
-	direction := rl.Vector2{
-		X: float32(math.Cos(float64(rotationRadians))),
-		Y: float32(math.Sin(float64(rotationRadians))),
-	}
-
-	// Calculate new position based on speed and direction
-	newPosition := rl.Vector2{
-		X: ship.Position.X + direction.X*ship.Speed,
-		Y: ship.Position.Y + direction.Y*ship.Speed,
-	}
-
-	// Update position if it's within screen bounds
-	if inScreenBounds(newPosition) {
-		ship.Position = newPosition
 	}
 }
 

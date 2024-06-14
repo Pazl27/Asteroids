@@ -2,7 +2,7 @@ package asteroids
 
 import (
 	rl "github.com/gen2brain/raylib-go/raylib"
-  "math/rand"
+	"math/rand"
 )
 
 const (
@@ -10,7 +10,14 @@ const (
 	MEDIUM = 2
 	LARGE  = 4
 
-	SPEED  = 2
+	SPEED = 2
+)
+
+var( 
+  list_size [3]int = [3]int{SMALL, MEDIUM, LARGE}
+
+  lastSpawnTime float64
+  Asteroid_added int = 0
 )
 
 type Asteroid struct {
@@ -18,13 +25,69 @@ type Asteroid struct {
 	Speed            rl.Vector2
 	Rotation         float32
 	RoatatationSpeed float32
+  texture           rl.Texture2D
 
-	Size int
-  Split bool
+	Size  int
+	Split bool
 }
 
 func DrawAsteroid(asteroid *Asteroid) {
-	rl.DrawPolyLines(asteroid.Position, 3, float32(16*asteroid.Size), asteroid.Rotation, rl.White)
+  rl.DrawTexturePro(asteroid.texture, 
+                    rl.Rectangle{X: 0, Y: 0, Width: float32(asteroid.texture.Width), Height: float32(asteroid.texture.Height)},
+                    rl.Rectangle{X: asteroid.Position.X, Y: asteroid.Position.Y, Width: float32(asteroid.texture.Width), Height: float32(asteroid.texture.Height)},
+                    rl.Vector2{X: float32(asteroid.texture.Width) / 2, Y: float32(asteroid.texture.Height) / 2},
+                    asteroid.Rotation,
+                    rl.White,
+    )
+	// rl.DrawPolyLines(asteroid.Position, 8, float32(16*asteroid.Size), asteroid.Rotation, rl.White)
+}
+
+func (asteroid *Asteroid) resizeImage() {
+  image := rl.LoadImage("assets/asteroid.png")
+  rl.ImageResize(image, int32(asteroid.Size * 32), int32(asteroid.Size * 32))
+  texture := rl.LoadTextureFromImage(image)
+  asteroid.texture = texture
+}
+
+func GetNewAsteroid(list_roids *[]Asteroid, asteroid_added *int) {
+	if *asteroid_added >= 15 {
+		return
+	}
+
+	currentTime := rl.GetTime()
+	if currentTime-lastSpawnTime < 1 {
+		return
+	}
+	lastSpawnTime = currentTime
+
+	size_rand := list_size[rand.Intn(len(list_size))]
+
+	// Generate a random position at the edge of the screen
+	edge := rand.Intn(4)
+	var position rl.Vector2
+	switch edge {
+	case 0: // top
+		position = rl.Vector2{X: float32(rand.Intn(rl.GetScreenWidth())), Y: 0}
+	case 1: // right
+		position = rl.Vector2{X: float32(rl.GetScreenWidth()), Y: float32(rand.Intn(rl.GetScreenHeight()))}
+	case 2: // bottom
+		position = rl.Vector2{X: float32(rand.Intn(rl.GetScreenWidth())), Y: float32(rl.GetScreenHeight())}
+	case 3: // left
+		position = rl.Vector2{X: 0, Y: float32(rand.Intn(rl.GetScreenHeight()))}
+	}
+
+  target_pos := getRandomPos()
+	a := Asteroid{
+		Position:         position,
+		Speed:            GetSpeed(&target_pos, position),
+		Rotation:         0,
+		RoatatationSpeed: float32(rand.Intn(5) - 2),
+		Size:             size_rand,
+	}
+  a.resizeImage()
+
+	*list_roids = append(*list_roids, a)
+	*asteroid_added++
 }
 
 func UpdateAsteroid(asteroid *Asteroid) {
@@ -43,35 +106,45 @@ func GetSpeed(target *rl.Vector2, position rl.Vector2) rl.Vector2 {
 }
 
 func SplitAsteroid(ast Asteroid, list_ast *[]Asteroid) {
-    if ast.Size == SMALL {
-        return
-    }
+	if ast.Size == SMALL {
+		return
+	}
 
-    newSize := SMALL
-    if ast.Size == LARGE {
-        newSize = MEDIUM
-    }
+	newSize := SMALL
+	if ast.Size == LARGE {
+		newSize = MEDIUM
+	}
 
-    for i := 0; i < 2; i++ {
-        // Generate a random direction vector
-        direction := rl.Vector2{
-            X: rand.Float32()*2 - 1,
-            Y: rand.Float32()*2 - 1,
-        }
-        direction = rl.Vector2Normalize(direction)
-        direction.X *= SPEED
-        direction.Y *= SPEED
+	for i := 0; i < 2; i++ {
+		// Generate a random direction vector
+		direction := rl.Vector2{
+			X: rand.Float32()*2 - 1,
+			Y: rand.Float32()*2 - 1,
+		}
+		direction = rl.Vector2Normalize(direction)
+		direction.X *= SPEED
+		direction.Y *= SPEED
 
-        new_ast := Asteroid{
-            Position: ast.Position,
-            Speed:    direction,
-            Rotation: float32(rand.Intn(360)), // Random initial rotation
-            RoatatationSpeed: float32(rand.Intn(5) - 2), // Random rotation speed
-            Size:     newSize,
-            Split:    true,
-        }
+		new_ast := Asteroid{
+			Position:         ast.Position,
+			Speed:            direction,
+			Rotation:         float32(rand.Intn(360)),   // Random initial rotation
+			RoatatationSpeed: float32(rand.Intn(5) - 2), // Random rotation speed
+			Size:             newSize,
+			Split:            true,
+		}
+    new_ast.resizeImage()
 
-        *list_ast = append(*list_ast, new_ast)
-    }
+		*list_ast = append(*list_ast, new_ast)
+	}
 }
 
+func getRandomPos() rl.Vector2 {
+	centerX := rl.GetScreenWidth() / 2
+	centerY := rl.GetScreenHeight() / 2
+
+	return rl.Vector2{
+		X: float32(centerX + rand.Intn(101) - 50),
+		Y: float32(centerY + rand.Intn(101) - 50),
+	}
+}

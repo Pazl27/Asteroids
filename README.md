@@ -35,12 +35,12 @@ $ go run cmd/main.go
 - `Space` to shoot
 
 ## Todos
-- [ ] spawn new asteroids when one is destroyed
+- [x] spawn new asteroids when one is destroyed
 - [ ] add music
 - [ ] add sound effects
 - [x] highscore system
 - [x] powerups
-- [ ] asteroid sprites
-- [ ] background image 
+- [x] asteroid sprites
+- [x] background image 
 - [ ] add lives
 

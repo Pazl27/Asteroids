@@ -49,5 +49,3 @@ func (b *Bullet) DeleteBullet() bool {
   }
   return false
 }
-
-
