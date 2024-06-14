@@ -8,8 +8,8 @@ A simple game of asteroids made with go and raylib.
 - [Todos](#todos)
 
 ## Description
-![gameplay](./Screenshots/menu.png)
-![gameplay](./Screenshots/gameplay.png)
+![gameplay](./Screenshots/menu_2.png)
+![gameplay](./Screenshots/gameplay_2.png)
 
 ## Installation
 - clone the repository
