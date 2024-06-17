@@ -17,7 +17,6 @@ var(
   list_size [3]int = [3]int{SMALL, MEDIUM, LARGE}
 
   lastSpawnTime float64
-  Asteroid_added int = 0
 )
 
 type Asteroid struct {
@@ -49,8 +48,10 @@ func (asteroid *Asteroid) resizeImage() {
   asteroid.texture = texture
 }
 
-func GetNewAsteroid(list_roids *[]Asteroid, asteroid_added *int) {
-	if *asteroid_added >= 15 {
+func GetNewAsteroid(list_roids *[]Asteroid) {
+	const maxAsteroids = 15
+
+	if len(*list_roids) >= maxAsteroids {
 		return
 	}
 
@@ -76,7 +77,7 @@ func GetNewAsteroid(list_roids *[]Asteroid, asteroid_added *int) {
 		position = rl.Vector2{X: 0, Y: float32(rand.Intn(rl.GetScreenHeight()))}
 	}
 
-  target_pos := getRandomPos()
+	target_pos := getRandomPos()
 	a := Asteroid{
 		Position:         position,
 		Speed:            GetSpeed(&target_pos, position),
@@ -84,10 +85,9 @@ func GetNewAsteroid(list_roids *[]Asteroid, asteroid_added *int) {
 		RoatatationSpeed: float32(rand.Intn(5) - 2),
 		Size:             size_rand,
 	}
-  a.resizeImage()
+	a.resizeImage()
 
 	*list_roids = append(*list_roids, a)
-	*asteroid_added++
 }
 
 func UpdateAsteroid(asteroid *Asteroid) {

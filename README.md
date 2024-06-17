@@ -43,4 +43,5 @@ $ go run cmd/main.go
 - [x] asteroid sprites
 - [x] background image 
 - [ ] add lives
+- [ ] waves of asteroids (level)
 

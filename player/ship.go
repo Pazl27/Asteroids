@@ -29,6 +29,8 @@ func NewShip() Ship {
     Speed:        0,
     Acceleration: 0.1,
     Rotation:     0,
+    Invincible: false,
+    InfiniteAmmo: false,
   }
 }
 

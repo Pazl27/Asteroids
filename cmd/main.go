@@ -55,8 +55,8 @@ func drawGame(background_texture rl.Texture2D) {
 	rl.BeginDrawing()
 	rl.ClearBackground(rl.Black)
 
-  // background image
-  rl.DrawTexture(background_texture, 0, 0, rl.White)
+	// Background image
+	rl.DrawTexture(background_texture, 0, 0, rl.White)
 
 	score_string := fmt.Sprintf("Score: %d", int(score))
 	rl.DrawText(score_string, 10, 10, 20, rl.White)
@@ -90,7 +90,6 @@ func checkBoarders() {
 
 		if ast_temp.Position.X > float32(rl.GetScreenWidth()) || ast_temp.Position.X < 0 || ast_temp.Position.Y > float32(rl.GetScreenHeight()) || ast_temp.Position.Y < 0 {
 			list_roids = append(list_roids[:i], list_roids[i+1:]...)
-			asteroid_added--
 		}
 	}
 }
@@ -176,6 +175,9 @@ func checkCollisions() {
 	checkItemCollision()
 	checkPlayerCollision()
 	checkBulletCollision()
+
+	// Add new asteroids if needed
+	as.GetNewAsteroid(&list_roids)
 }
 
 func resetGame() {
@@ -274,7 +276,7 @@ func main() {
 
 	rl.SetTargetFPS(60)
 
-  background_texture := loadTextures()
+	background_texture := loadTextures()
 
 	last_item_spawn_time = rl.GetTime()
 
@@ -285,7 +287,7 @@ func main() {
 		} else {
 			score += rl.GetFrameTime()
 			checkBoarders()
-			as.GetNewAsteroid(&list_roids,  &asteroid_added)
+			as.GetNewAsteroid(&list_roids) // Continuously check and add new asteroids if needed
 			checkCollisions()
 			disableExpiredEffects()
 			drawGame(background_texture)
@@ -298,3 +300,4 @@ func main() {
 		}
 	}
 }
+
