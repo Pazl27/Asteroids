@@ -54,7 +54,7 @@ func (ship *Ship) UpdateShip() {
   ship.processInput()
 	// Delete bullets that are out of bounds
 	for i := 0; i < len(ship.Bullets); i++ {
-		if ship.Bullets[i].DeleteBullet() {
+		if ship.Bullets[i].DeleteBullet(ship.Position) {
 			ship.Bullets = append(ship.Bullets[:i], ship.Bullets[i+1:]...)
 		}
 	}
@@ -100,11 +100,11 @@ func (ship *Ship)processInput() {
 
 	// Handle rotation
 	if rl.IsKeyDown(rl.KeyA) {
-		ship.Rotation -= 5
+		ship.Rotation -= 6
 	}
 
 	if rl.IsKeyDown(rl.KeyD) {
-		ship.Rotation += 5
+		ship.Rotation += 6
 	}
 
 	// Stop the ship

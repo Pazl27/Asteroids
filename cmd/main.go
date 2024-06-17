@@ -189,6 +189,8 @@ func resetGame() {
 	asteroid_added = 0
 	last_item_spawn_time = rl.GetTime()
 	item_effect_start_times = make(map[string]float64)
+
+  item = nil
 }
 
 func drawMenu() {

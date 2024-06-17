@@ -42,10 +42,17 @@ func (b *Bullet) Draw() {
 	rl.DrawCircleV(b.Position, 5, rl.Red)
 }
 
-func (b *Bullet) DeleteBullet() bool {
+func (b *Bullet) DeleteBullet(playerPosition rl.Vector2) bool {
   // Check if the bullet is out of bounds
   if b.Position.X < 0 || b.Position.X > 1000 || b.Position.Y < 0 || b.Position.Y > 800 {
     return true
   }
+
+  // TODO: Bullets should also be removed if they are more than 200 pixels away from the player
+  distance := rl.Vector2Distance(b.Position, playerPosition)
+	if distance > 500 {
+		return true
+	}
+  
   return false
 }
