@@ -6,10 +6,10 @@ import (
 	"math/rand"
 	"os"
 
-  rl "github.com/gen2brain/raylib-go/raylib"
 	as "example.com/asteroids/asteroids"
 	it "example.com/asteroids/items"
 	pl "example.com/asteroids/player"
+	rl "github.com/gen2brain/raylib-go/raylib"
 )
 
 type HighScore struct {
@@ -18,29 +18,30 @@ type HighScore struct {
 }
 
 var (
-	list_roids  []as.Asteroid
-  asteroid_added int = 0
-
-  player = pl.NewShip()
-
-	game_running = false
-
-	score     float32 = 0.0
-	highscore HighScore
-
-	player_name string = "unknown"
-
-	item                 it.Item                    = nil
+	list_roids              []as.Asteroid
+	asteroid_added          int     = 0
+	player                          = pl.NewShip()
+	game_running                    = false
+	score                   float32 = 0.0
+	highscore               HighScore
+	player_name                                        = make([]rune, 0)
+	item                    it.Item                    = nil
 	last_item_spawn_time    float64                    // Track the last item spawn time
 	item_effect_start_times = make(map[string]float64) // Track when item effects start
+	framesCounter           int
 )
 
 const (
-	ScreenWidth  = 1000
-	ScreenHeight = 800
-	PLAYER_WIDTH = 48
+	ScreenWidth   = 1000
+	ScreenHeight  = 800
+	PLAYER_WIDTH  = 48
+	maxInputChars = 9
 )
 
+/*
+* function to get a random position on the screen
+* the position is within 101 pixels of the center of the screen
+*/
 func getRandomPos() rl.Vector2 {
 	centerX := ScreenWidth / 2
 	centerY := ScreenHeight / 2
@@ -51,6 +52,10 @@ func getRandomPos() rl.Vector2 {
 	}
 }
 
+/*
+* function to draw the game
+* draws the background, player, asteroids and items
+*/ 
 func drawGame(background_texture rl.Texture2D) {
 	rl.BeginDrawing()
 	rl.ClearBackground(rl.Black)
@@ -83,7 +88,9 @@ func drawGame(background_texture rl.Texture2D) {
 	rl.EndDrawing()
 }
 
-
+/*
+* function to delete asteroids that go off the screen
+*/
 func checkBoarders() {
 	for i := len(list_roids) - 1; i >= 0; i-- {
 		ast_temp := list_roids[i]
@@ -94,6 +101,10 @@ func checkBoarders() {
 	}
 }
 
+/*
+* function to check if the player has collided with an asteroid
+* if that happens the game ends 
+*/
 func checkPlayerCollision() {
 	if !player.Invincible {
 		playerRadius := float32(PLAYER_WIDTH) / 2
@@ -110,6 +121,11 @@ func checkPlayerCollision() {
 	}
 }
 
+/*
+* function to check if a bullet has collided with an asteroid
+* if that happens the bullet is removed
+* if that happens the asteroid is split and the score is updated
+*/
 func checkBulletCollision() {
 	for i := len(player.Bullets) - 1; i >= 0; i-- {
 		bullet := player.Bullets[i]
@@ -145,6 +161,9 @@ func checkBulletCollision() {
 	}
 }
 
+/* 
+* function to check if the player has collided with an item
+*/
 func checkItemCollision() {
 	if item != nil {
 		distance := rl.Vector2Distance(player.Position, item.GetPosition())
@@ -156,6 +175,10 @@ func checkItemCollision() {
 	}
 }
 
+/*
+* function that check if the item timer has expired
+* if it has the effect is removed
+*/
 func disableExpiredEffects() {
 	currentTime := rl.GetTime()
 	for effect, startTime := range item_effect_start_times {
@@ -171,17 +194,28 @@ func disableExpiredEffects() {
 	}
 }
 
+/* 
+* function that checks for collisions
+* checks if the player has picked up an item
+* checks if the player has collided with an asteroid
+* checks if a bullet has collided with an asteroid
+* also spawns new asteroids if needed
+*/
 func checkCollisions() {
 	checkItemCollision()
 	checkPlayerCollision()
 	checkBulletCollision()
 
-	// Add new asteroids if needed
 	as.GetNewAsteroid(&list_roids)
 }
 
+/* 
+* function to reset the game
+* resets the player, asteroids, score and game state
+* remvoes all items
+*/
 func resetGame() {
-  player = pl.NewShip()
+	player = pl.NewShip()
 
 	list_roids = nil
 	score = 0
@@ -190,9 +224,14 @@ func resetGame() {
 	last_item_spawn_time = rl.GetTime()
 	item_effect_start_times = make(map[string]float64)
 
-  item = nil
+	item = nil
 }
 
+/* 
+* function that draws the menu
+* draws the title, score, highscore and instructions
+* also draws the text box for the player to enter their name
+*/
 func drawMenu() {
 	rl.BeginDrawing()
 	rl.ClearBackground(rl.Black)
@@ -201,13 +240,58 @@ func drawMenu() {
 	rl.DrawText("Score: "+fmt.Sprintf("%d", int(score)), ScreenWidth/2-100, ScreenHeight/2+50, 20, rl.White)
 	rl.DrawText("Highscore: "+fmt.Sprintf("%d", highscore.Score), ScreenWidth/2-100, ScreenHeight/2+75, 20, rl.White)
 	rl.DrawText("Press 'Q' to quit", ScreenWidth/2-100, ScreenHeight/2+100, 20, rl.White)
-	// TODO: Add input for player name
+	rl.DrawText("Enter Name:", ScreenWidth-200, ScreenHeight-70, 10, rl.White)
+
+	textBox := rl.Rectangle{X: ScreenWidth - 200, Y: ScreenHeight - 50, Width: 180, Height: 30}
+	mouseOnText := rl.CheckCollisionPointRec(rl.GetMousePosition(), textBox)
+
+	if mouseOnText {
+		framesCounter++
+	} else {
+		framesCounter = 0
+	}
+
+	// Draw the text box
+	rl.DrawRectangleRec(textBox, rl.LightGray)
+	if mouseOnText {
+		rl.DrawRectangleLines(int32(textBox.X), int32(textBox.Y), int32(textBox.Width), int32(textBox.Height), rl.Red)
+	} else {
+		rl.DrawRectangleLines(int32(textBox.X), int32(textBox.Y), int32(textBox.Width), int32(textBox.Height), rl.DarkGray)
+	}
+
+	rl.DrawText(string(player_name), int32(textBox.X)+5, int32(textBox.Y)+5, 20, rl.Maroon)
+
+	if mouseOnText {
+		rl.SetMouseCursor(rl.MouseCursorIBeam)
+
+		key := rl.GetCharPressed()
+		for key > 0 {
+			if key >= 32 && key <= 125 && len(player_name) < maxInputChars {
+				player_name = append(player_name, key)
+			}
+			key = rl.GetCharPressed()
+		}
+		if (framesCounter/20)%2 == 0 {
+			rl.DrawText("_", int32(textBox.X)+8+rl.MeasureText(string(player_name), 20), int32(textBox.Y)+10, 20, rl.Maroon)
+		}
+
+		if rl.IsKeyPressed(rl.KeyBackspace) {
+			if len(player_name) > 0 {
+				player_name = player_name[:len(player_name)-1]
+			}
+		}
+	} else {
+		rl.SetMouseCursor(rl.MouseCursorDefault)
+	}
 
 	rl.EndDrawing()
 
 	processInput()
 }
 
+/* 
+* function to process input in the menu
+*/
 func processInput() {
 	if rl.IsKeyPressed(rl.KeyEnter) {
 		resetGame()
@@ -218,10 +302,16 @@ func processInput() {
 	}
 }
 
+/* 
+* init function to load the highscore
+*/
 func init() {
 	decodeHighScore()
 }
 
+/* 
+* function to decode the highscore
+*/
 func decodeHighScore() {
 	file, err := os.Open("highscore.json")
 	if err != nil {
@@ -238,6 +328,10 @@ func decodeHighScore() {
 	}
 }
 
+/*
+* function to check if the current score is higher than the highscore
+* if yes the function saveHighScore is called
+*/
 func checkHighScore() {
 	if int(score) > highscore.Score {
 		err := saveHighScore()
@@ -247,9 +341,17 @@ func checkHighScore() {
 	}
 }
 
+/*
+* function to save the highscore
+* @return error
+*/
 func saveHighScore() error {
 	highscore.Score = int(score)
-	highscore.Name = player_name
+	if player_name != nil {
+		highscore.Name = string(player_name)
+	} else {
+		highscore.Name = "Unknown"
+	}
 	file, err := os.Create("highscore.json")
 	if err != nil {
 		return fmt.Errorf("failed to create file: %w", err)
@@ -264,14 +366,24 @@ func saveHighScore() error {
 	return nil
 }
 
+/*
+* function that loads the background texture
+* @return rl.Texture2D
+*/
 func loadTextures() rl.Texture2D {
-  background := rl.LoadImage("assets/background_3.jpg")
-  rl.ImageResize(background, ScreenWidth, ScreenHeight)
-  background_texture := rl.LoadTextureFromImage(background)
+	background := rl.LoadImage("assets/background_3.jpg")
+	rl.ImageResize(background, ScreenWidth, ScreenHeight)
+	background_texture := rl.LoadTextureFromImage(background)
 
-  return background_texture
+	return background_texture
 }
 
+/* 
+* main function
+* initializes the window, sets the target fps
+* loads the background texture
+* runs the game loop
+*/
 func main() {
 	rl.InitWindow(ScreenWidth, ScreenHeight, "Asteroids")
 	defer rl.CloseWindow()

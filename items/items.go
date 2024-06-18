@@ -7,6 +7,11 @@ import (
 	pl "example.com/asteroids/player"
 )
 
+/* 
+* interface for items
+* used to create new items, draw them, apply effects to the player
+* useful for a list with Items with different structs
+*/
 type Item interface {
 	NewItem()
 	Draw()
@@ -23,6 +28,9 @@ type Invincible struct {
 	Color          rl.Color
 }
 
+/* 
+* function to create a new invincible item
+*/
 func (i *Invincible) NewItem() {
 	i.Position = getRandomPos()
 	i.Invincible = true
@@ -30,22 +38,37 @@ func (i *Invincible) NewItem() {
 	i.Color = rl.Yellow
 }
 
+/*
+* function to draw the invincible item
+*/
 func (i *Invincible) Draw() {
 	rl.DrawCircleV(i.Position, 10, i.Color)
 }
 
+/*
+* function to get the position of the invincible item
+*/
 func (i *Invincible) GetPosition() rl.Vector2 {
 	return i.Position
 }
 
+/*
+* function to apply the invincible effect to the player
+*/
 func (i *Invincible) ApplyEffect(player *pl.Ship) {
 	player.Invincible = true
 }
 
+/*
+* function to get the time of the invincible item
+*/
 func (i *Invincible) GetTime() float32 {
 	return i.InvincibleTime
 }
 
+/*
+* function to get the name of the item
+*/
 func (i *Invincible) GetName() string {
 	return "Invincible"
 }
@@ -57,6 +80,9 @@ type InfiniteAmmo struct {
 	Color            rl.Color
 }
 
+/*
+* function to create a new infinite ammo item
+*/
 func (i *InfiniteAmmo) NewItem() {
 	i.Position = getRandomPos()
 	i.InfiniteAmmo = true
@@ -64,26 +90,45 @@ func (i *InfiniteAmmo) NewItem() {
 	i.Color = rl.Blue
 }
 
+/*
+* function to draw the infinite ammo item
+*/
 func (i *InfiniteAmmo) Draw() {
 	rl.DrawCircleV(i.Position, 10, i.Color)
 }
 
+/*
+* function to get the position of the infinite ammo item
+*/
 func (i *InfiniteAmmo) GetPosition() rl.Vector2 {
 	return i.Position
 }
 
+/*
+* function to apply the infinite ammo effect to the player
+*/
 func (i *InfiniteAmmo) ApplyEffect(player *pl.Ship) {
 	player.InfiniteAmmo = true
 }
 
+/*
+* function to get the time of the infinite ammo item
+*/
 func (i *InfiniteAmmo) GetTime() float32 {
 	return i.InfiniteAmmoTime
 }
 
+/*
+* function to get the name of the item
+*/
 func (i *InfiniteAmmo) GetName() string {
 	return "InfiniteAmmo"
 }
 
+/*
+* function to spawn a random item
+* @return Item
+*/
 func SpawnItem() Item {
 	random := rand.Intn(2)
 	var item Item
@@ -99,6 +144,10 @@ func SpawnItem() Item {
 	return item
 }
 
+/*
+* function to get a random position in the window
+* @return rl.Vector2
+*/
 func getRandomPos() rl.Vector2 {
 	return rl.Vector2{
 		X: float32(rand.Intn(rl.GetScreenWidth())),

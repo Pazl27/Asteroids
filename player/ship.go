@@ -20,6 +20,10 @@ type Ship struct {
   InfiniteAmmo bool
 }
 
+/*
+* function to create a new ship
+* @return Ship
+*/
 func NewShip() Ship {
   return Ship{
     Position: rl.Vector2{
@@ -34,6 +38,10 @@ func NewShip() Ship {
   }
 }
 
+/*
+* function to draw the ship
+* @param string image
+*/
 func (ship *Ship) DrawShip(image string) {
   texture := rl.LoadTexture(image)
 	// Draw the ship using its position and rotation
@@ -48,6 +56,11 @@ func (ship *Ship) DrawShip(image string) {
 	}
 }
 
+/*
+* function to update the ship
+* calls the processInput function to handle key inputs
+* updates the position of the ship and bullets
+*/
 func (ship *Ship) UpdateShip() {
   
   // processes key inputs
@@ -84,6 +97,14 @@ func (ship *Ship) UpdateShip() {
 	}
 }
 
+/*
+* function to handle key inputs
+* W - accelerate
+* A - rotate left
+* D - rotate right
+* S - stop
+* Space - shoot
+*/
 func (ship *Ship)processInput() {
 	// Handle acceleration and deceleration
 	if rl.IsKeyDown(rl.KeyW) {
@@ -123,6 +144,11 @@ func (ship *Ship)processInput() {
 	}
 }
 
+/*
+* function to check if the ship is in screen bounds
+* @param rl.Vector2 pos
+* @return bool
+*/
 func inScreenBounds(pos rl.Vector2) bool {
 	return pos.X > 0 && pos.X < float32(rl.GetScreenWidth()) && pos.Y > 0 && pos.Y < float32(rl.GetScreenHeight())
 }

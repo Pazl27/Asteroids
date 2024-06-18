@@ -30,6 +30,10 @@ type Asteroid struct {
 	Split bool
 }
 
+/* 
+* function to draw the asteroid
+* @param *Asteroid asteroid
+*/
 func DrawAsteroid(asteroid *Asteroid) {
   rl.DrawTexturePro(asteroid.texture, 
                     rl.Rectangle{X: 0, Y: 0, Width: float32(asteroid.texture.Width), Height: float32(asteroid.texture.Height)},
@@ -41,6 +45,9 @@ func DrawAsteroid(asteroid *Asteroid) {
 	// rl.DrawPolyLines(asteroid.Position, 8, float32(16*asteroid.Size), asteroid.Rotation, rl.White)
 }
 
+/*
+* function to resize the asteroid image
+*/
 func (asteroid *Asteroid) resizeImage() {
   image := rl.LoadImage("assets/asteroid.png")
   rl.ImageResize(image, int32(asteroid.Size * 32), int32(asteroid.Size * 32))
@@ -48,6 +55,18 @@ func (asteroid *Asteroid) resizeImage() {
   asteroid.texture = texture
 }
 
+/* 
+* function that creates new asteroids
+* @param *[]Asteroid list_roids
+* if the number of asteroids is less than the maximum number of asteroids new ones spawn
+* the new asteroids spawn at the edge of the screen
+* spawn time is 1 second
+* the position of the asteroid is random calls the getRandomTarget function
+* the speed of the asteroid is calculated using the GetSpeed function
+* the rotation of the asteroid is random
+* the size of the asteroid is random
+* the resizeImage function is called to resize the asteroid image
+*/
 func GetNewAsteroid(list_roids *[]Asteroid) {
 	const maxAsteroids = 15
 
@@ -77,7 +96,7 @@ func GetNewAsteroid(list_roids *[]Asteroid) {
 		position = rl.Vector2{X: 0, Y: float32(rand.Intn(rl.GetScreenHeight()))}
 	}
 
-	target_pos := getRandomPos()
+	target_pos := getRandomTarget()
 	a := Asteroid{
 		Position:         position,
 		Speed:            GetSpeed(&target_pos, position),
@@ -90,12 +109,26 @@ func GetNewAsteroid(list_roids *[]Asteroid) {
 	*list_roids = append(*list_roids, a)
 }
 
+/*
+* function to update the asteroid
+* @param *Asteroid asteroid
+* updates the position of the asteroid based on the speed
+* updates the rotation of the asteroid based on the rotation speed
+*/
 func UpdateAsteroid(asteroid *Asteroid) {
 	asteroid.Position.X += asteroid.Speed.X
 	asteroid.Position.Y += asteroid.Speed.Y
 	asteroid.Rotation += asteroid.RoatatationSpeed
 }
 
+/*
+* function to calculate the speed of the asteroid
+* @param *rl.Vector2 target
+* @param rl.Vector2 position
+* calculates the speed of the asteroid based on the target and position
+* the speed is normalized
+* the speed is multiplied by the speed constant
+*/
 func GetSpeed(target *rl.Vector2, position rl.Vector2) rl.Vector2 {
 	speed := rl.Vector2{X: target.X - position.X, Y: target.Y - position.Y}
 	speed = rl.Vector2Normalize(speed)
@@ -105,6 +138,17 @@ func GetSpeed(target *rl.Vector2, position rl.Vector2) rl.Vector2 {
 	return speed
 }
 
+/*
+* function to split the asteroid
+* @param Asteroid ast
+* @param *[]Asteroid list_ast
+* if the asteroid is small it does not split
+* if the asteroid is large it splits into two medium asteroids
+* the new asteroids have random directions
+* the new asteroids have random rotation speeds
+* the new asteroids have the size of the asteroid that split
+* the resizeImage function is called to resize the asteroid image
+*/
 func SplitAsteroid(ast Asteroid, list_ast *[]Asteroid) {
 	if ast.Size == SMALL {
 		return
@@ -139,7 +183,12 @@ func SplitAsteroid(ast Asteroid, list_ast *[]Asteroid) {
 	}
 }
 
-func getRandomPos() rl.Vector2 {
+/*
+* function to get a random position
+* returns a random position within the screen
+* the position is the target position for the asteroid
+*/
+func getRandomTarget() rl.Vector2 {
 	centerX := rl.GetScreenWidth() / 2
 	centerY := rl.GetScreenHeight() / 2
 
