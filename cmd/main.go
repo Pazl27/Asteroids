@@ -347,10 +347,10 @@ func checkHighScore() {
 */
 func saveHighScore() error {
 	highscore.Score = int(score)
-	if player_name != nil {
-		highscore.Name = string(player_name)
+	if player_name == nil || len(player_name) == 0{
+    highscore.Name = "Unknown"
 	} else {
-		highscore.Name = "Unknown"
+    highscore.Name = string(player_name)
 	}
 	file, err := os.Create("highscore.json")
 	if err != nil {
@@ -386,6 +386,7 @@ func loadTextures() rl.Texture2D {
 */
 func main() {
 	rl.InitWindow(ScreenWidth, ScreenHeight, "Asteroids")
+  rl.SetExitKey(0)
 	defer rl.CloseWindow()
 
 	rl.SetTargetFPS(60)

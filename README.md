@@ -42,6 +42,6 @@ $ go run cmd/main.go
 - [x] powerups
 - [x] asteroid sprites
 - [x] background image 
-- [ ] add lives
+- [ ] add lifes
 - [ ] waves of asteroids (level)
 
