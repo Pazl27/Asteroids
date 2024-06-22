@@ -20,7 +20,7 @@ type HighScore struct {
 var (
 	list_roids              []as.Asteroid
 	asteroid_added          int     = 0
-	player                          = pl.NewShip()
+	player                  pl.Ship
 	game_running                    = false
 	score                   float32 = 0.0
 	highscore               HighScore
@@ -83,7 +83,8 @@ func drawGame(background_texture rl.Texture2D) {
 	}
 
 	player.UpdateShip()
-	player.DrawShip("assets/ship.png")
+	player.DrawShip()
+  player.DrawHealth()
 
 	rl.EndDrawing()
 }
@@ -103,7 +104,9 @@ func checkBoarders() {
 
 /*
 * function to check if the player has collided with an asteroid
-* if that happens the game ends 
+* if that happens the player loses health
+* player gets reset to the center of the screen
+* if the player has no health the game ends
 */
 func checkPlayerCollision() {
 	if !player.Invincible {
@@ -115,9 +118,14 @@ func checkPlayerCollision() {
 
 			distance := rl.Vector2Distance(player.Position, asteroid.Position)
 			if distance < playerRadius+asteroidRadius {
-				game_running = false
+        player.Health --
+        player.Reset()
 			}
 		}
+
+    if player.Health <= 0 {
+      game_running = false
+    }
 	}
 }
 
@@ -392,6 +400,8 @@ func main() {
 	rl.SetTargetFPS(60)
 
 	background_texture := loadTextures()
+
+  player = pl.NewShip()
 
 	last_item_spawn_time = rl.GetTime()
 

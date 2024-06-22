@@ -2,11 +2,13 @@ package player
 
 import (
 	"math"
+	"time"
 
 	rl "github.com/gen2brain/raylib-go/raylib"
 )
 
 const MAX_SPEED = 6.0
+const IMMUNITY_DURATION = time.Second
 
 type Ship struct {
 	Position     rl.Vector2
@@ -14,42 +16,66 @@ type Ship struct {
 	Acceleration float32
 	Rotation     float32 // in degrees
 
-	Bullets      []Bullet
+	Bullets []Bullet
 
-  Invincible bool
-  InfiniteAmmo bool
+	Invincible   bool
+	InfiniteAmmo bool
+
+	Health int
+
+	textureShip  rl.Texture2D
+	textureHeart rl.Texture2D
+
+	resetProtection time.Time
 }
 
 /*
 * function to create a new ship
 * @return Ship
-*/
+ */
 func NewShip() Ship {
-  return Ship{
-    Position: rl.Vector2{
-      X: float32(rl.GetScreenWidth() / 2),
-      Y: float32(rl.GetScreenHeight() / 2),
-    },
-    Speed:        0,
-    Acceleration: 0.1,
-    Rotation:     0,
-    Invincible: false,
-    InfiniteAmmo: false,
-  }
+	return Ship{
+		Position: rl.Vector2{
+			X: float32(rl.GetScreenWidth() / 2),
+			Y: float32(rl.GetScreenHeight() / 2),
+		},
+		Speed:        0,
+		Acceleration: 0.1,
+		Rotation:     0,
+		Invincible:   false,
+		InfiniteAmmo: false,
+
+		Health: 3,
+
+		textureShip:  rl.LoadTexture("assets/ship.png"),
+		textureHeart: resizeTexture("assets/heart.png", 32, 32),
+	}
+}
+
+/*
+* function to resize the texture
+* @param string image
+* @param int width
+* @param int height
+* @return rl.Texture2D
+ */
+func resizeTexture(image string, width int, height int) rl.Texture2D {
+	img := rl.LoadImage(image)
+	rl.ImageResize(img, int32(width), int32(height))
+	texture := rl.LoadTextureFromImage(img)
+	return texture
 }
 
 /*
 * function to draw the ship
-* @param string image
-*/
-func (ship *Ship) DrawShip(image string) {
-  texture := rl.LoadTexture(image)
-	// Draw the ship using its position and rotation
-	// rl.DrawPolyLines(ship.Position, 3, 16, ship.Rotation, rl.White)
+* TODO: Draw the ship with differnt colors based on the effect
+* FIX: Drawing Invincible ship with yellow doesn't work
+ */
+func (ship *Ship) DrawShip() {
 	source := rl.Rectangle{X: 0, Y: 0, Width: 32, Height: 48}
 	dest := rl.Rectangle{X: ship.Position.X, Y: ship.Position.Y, Width: 48, Height: 48}
 	origin := rl.Vector2{X: dest.Width / 2, Y: dest.Height / 2}
-	rl.DrawTexturePro(texture, source, dest, origin, ship.Rotation+90, rl.White)
+	rl.DrawTexturePro(ship.textureShip, source, dest, origin, ship.Rotation+90, rl.White)
 
 	for _, bullet := range ship.Bullets {
 		bullet.Draw()
@@ -57,14 +83,39 @@ func (ship *Ship) DrawShip(image string) {
 }
 
 /*
+* function that resets the ship to the center of the screen
+ */
+func (ship *Ship) Reset() {
+	ship.Position = rl.Vector2{
+		X: float32(rl.GetScreenWidth() / 2),
+		Y: float32(rl.GetScreenHeight() / 2),
+	}
+	ship.Speed = 0
+	ship.Rotation = 0
+
+	ship.resetProtection = time.Now()
+	ship.Invincible = true
+}
+
+/*
+* function to draw the health of the ship
+ */
+func (ship *Ship) DrawHealth() {
+
+	for i := 0; i < ship.Health; i++ {
+		rl.DrawTexture(ship.textureHeart, int32(10+32*i), int32(rl.GetScreenHeight()-50), rl.White)
+	}
+}
+
+/*
 * function to update the ship
 * calls the processInput function to handle key inputs
 * updates the position of the ship and bullets
-*/
+ */
 func (ship *Ship) UpdateShip() {
-  
-  // processes key inputs
-  ship.processInput()
+
+	// processes key inputs
+	ship.processInput()
 	// Delete bullets that are out of bounds
 	for i := 0; i < len(ship.Bullets); i++ {
 		if ship.Bullets[i].DeleteBullet(ship.Position) {
@@ -95,6 +146,11 @@ func (ship *Ship) UpdateShip() {
 	if inScreenBounds(newPosition) {
 		ship.Position = newPosition
 	}
+
+	// Check if the ship is immune
+	if time.Since(ship.resetProtection) > IMMUNITY_DURATION {
+		ship.Invincible = false
+	}
 }
 
 /*
@@ -104,8 +160,8 @@ func (ship *Ship) UpdateShip() {
 * D - rotate right
 * S - stop
 * Space - shoot
-*/
-func (ship *Ship)processInput() {
+ */
+func (ship *Ship) processInput() {
 	// Handle acceleration and deceleration
 	if rl.IsKeyDown(rl.KeyW) {
 		ship.Speed += ship.Acceleration
@@ -134,11 +190,11 @@ func (ship *Ship)processInput() {
 	}
 
 	// Shoot a bullet
-  if ship.InfiniteAmmo && rl.IsKeyDown(rl.KeySpace) {
-    newBullet := NewBullet(ship.Position, ship.Rotation) // Adjust the speed as needed
-    ship.Bullets = append(ship.Bullets, newBullet)
+	if ship.InfiniteAmmo && rl.IsKeyDown(rl.KeySpace) {
+		newBullet := NewBullet(ship.Position, ship.Rotation) // Adjust the speed as needed
+		ship.Bullets = append(ship.Bullets, newBullet)
 
-  } else if rl.IsKeyPressed(rl.KeySpace) {
+	} else if rl.IsKeyPressed(rl.KeySpace) {
 		newBullet := NewBullet(ship.Position, ship.Rotation) // Adjust the speed as needed
 		ship.Bullets = append(ship.Bullets, newBullet)
 	}
@@ -148,7 +204,7 @@ func (ship *Ship)processInput() {
 * function to check if the ship is in screen bounds
 * @param rl.Vector2 pos
 * @return bool
-*/
+ */
 func inScreenBounds(pos rl.Vector2) bool {
 	return pos.X > 0 && pos.X < float32(rl.GetScreenWidth()) && pos.Y > 0 && pos.Y < float32(rl.GetScreenHeight())
 }
