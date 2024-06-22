@@ -9,6 +9,7 @@ import (
 
 const MAX_SPEED = 6.0
 const IMMUNITY_DURATION = time.Second
+const RELOAD_TIME = time.Second * 4
 
 type Ship struct {
 	Position     rl.Vector2
@@ -16,17 +17,18 @@ type Ship struct {
 	Acceleration float32
 	Rotation     float32 // in degrees
 
-	Bullets []Bullet
-
+	Bullets      []Bullet
 	Invincible   bool
 	InfiniteAmmo bool
-
-	Health int
+	Health       int
+	Ammo         int
+	Reloading    bool
 
 	textureShip  rl.Texture2D
 	textureHeart rl.Texture2D
 
 	resetProtection time.Time
+	reloadStart     time.Time
 }
 
 /*
@@ -44,6 +46,7 @@ func NewShip() Ship {
 		Rotation:     0,
 		Invincible:   false,
 		InfiniteAmmo: false,
+		Ammo:         20,
 
 		Health: 3,
 
@@ -103,7 +106,21 @@ func (ship *Ship) Reset() {
 func (ship *Ship) DrawHealth() {
 
 	for i := 0; i < ship.Health; i++ {
-		rl.DrawTexture(ship.textureHeart, int32(10+32*i), int32(rl.GetScreenHeight()-50), rl.White)
+		rl.DrawTexture(ship.textureHeart, int32(10+32*i), int32(rl.GetScreenHeight()-75), rl.White)
+	}
+}
+
+/*
+* function that draws the ammo of the ship
+* if reloading, draw a loading bar
+ */
+func (ship *Ship) DrawAmmo() {
+	if ship.Reloading {
+		rl.DrawRectangle(10, int32(rl.GetScreenHeight()-30), 200, 20, rl.Black)
+		rl.DrawRectangle(10, int32(rl.GetScreenHeight()-30), int32(200-(time.Since(ship.reloadStart).Seconds()*50)), 20, rl.Red)
+	} else {
+		rl.DrawRectangle(10, int32(rl.GetScreenHeight()-30), 200, 20, rl.Black)
+		rl.DrawRectangle(10, int32(rl.GetScreenHeight()-30), int32(200-(float32(ship.Ammo)*10)), 20, rl.Red)
 	}
 }
 
@@ -151,6 +168,15 @@ func (ship *Ship) UpdateShip() {
 	if time.Since(ship.resetProtection) > IMMUNITY_DURATION {
 		ship.Invincible = false
 	}
+
+	// reload ammo
+	if ship.Ammo == 0 && !ship.Reloading {
+		ship.Reloading = true
+		ship.reloadStart = time.Now()
+	} else if ship.Reloading && time.Since(ship.reloadStart) > RELOAD_TIME {
+		ship.Ammo = 20
+		ship.Reloading = false
+	}
 }
 
 /*
@@ -194,9 +220,10 @@ func (ship *Ship) processInput() {
 		newBullet := NewBullet(ship.Position, ship.Rotation) // Adjust the speed as needed
 		ship.Bullets = append(ship.Bullets, newBullet)
 
-	} else if rl.IsKeyPressed(rl.KeySpace) {
+	} else if rl.IsKeyPressed(rl.KeySpace) && !ship.Reloading {
 		newBullet := NewBullet(ship.Position, ship.Rotation) // Adjust the speed as needed
 		ship.Bullets = append(ship.Bullets, newBullet)
+		ship.Ammo--
 	}
 }
 

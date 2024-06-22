@@ -9,7 +9,7 @@ A simple game of asteroids made with go and raylib.
 
 ## Description
 ![gameplay](./Screenshots/menu_2.png)
-![gameplay](./Screenshots/gameplay_2.png)
+![gameplay](./Screenshots/gameplay_3.png)
 
 ## Installation
 - clone the repository
@@ -42,6 +42,6 @@ $ go run cmd/main.go
 - [x] powerups
 - [x] asteroid sprites
 - [x] background image 
-- [ ] add lifes
+- [x] add lifes
 - [ ] waves of asteroids (level)
 

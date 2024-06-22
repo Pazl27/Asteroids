@@ -85,6 +85,7 @@ func drawGame(background_texture rl.Texture2D) {
 	player.UpdateShip()
 	player.DrawShip()
   player.DrawHealth()
+  player.DrawAmmo()
 
 	rl.EndDrawing()
 }
