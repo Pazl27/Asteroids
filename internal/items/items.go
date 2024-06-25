@@ -4,7 +4,7 @@ import (
 	"math/rand"
 
 	rl "github.com/gen2brain/raylib-go/raylib"
-	pl "example.com/asteroids/player"
+	pl "example.com/asteroids/internal/player"
 )
 
 /* 

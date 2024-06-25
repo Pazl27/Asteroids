@@ -49,7 +49,7 @@ func DrawAsteroid(asteroid *Asteroid) {
 * function to resize the asteroid image
 */
 func (asteroid *Asteroid) resizeImage() {
-  image := rl.LoadImage("assets/asteroid.png")
+  image := rl.LoadImage("assets/images/asteroid.png")
   rl.ImageResize(image, int32(asteroid.Size * 32), int32(asteroid.Size * 32))
   texture := rl.LoadTextureFromImage(image)
   asteroid.texture = texture

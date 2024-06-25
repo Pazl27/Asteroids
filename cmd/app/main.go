@@ -6,9 +6,9 @@ import (
 	"math/rand"
 	"os"
 
-	as "example.com/asteroids/asteroids"
-	it "example.com/asteroids/items"
-	pl "example.com/asteroids/player"
+	as "example.com/asteroids/internal/asteroids"
+	it "example.com/asteroids/internal/items"
+	pl "example.com/asteroids/internal/player"
 	rl "github.com/gen2brain/raylib-go/raylib"
 )
 
@@ -380,7 +380,7 @@ func saveHighScore() error {
 * @return rl.Texture2D
 */
 func loadTextures() rl.Texture2D {
-	background := rl.LoadImage("assets/background_3.jpg")
+	background := rl.LoadImage("assets/images/background_3.jpg")
 	rl.ImageResize(background, ScreenWidth, ScreenHeight)
 	background_texture := rl.LoadTextureFromImage(background)
 

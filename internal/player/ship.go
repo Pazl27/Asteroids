@@ -50,8 +50,8 @@ func NewShip() Ship {
 
 		Health: 3,
 
-		textureShip:  rl.LoadTexture("assets/ship.png"),
-		textureHeart: resizeTexture("assets/heart.png", 32, 32),
+		textureShip:  rl.LoadTexture("assets/images/ship.png"),
+		textureHeart: resizeTexture("assets/images/heart.png", 32, 32),
 	}
 }
 

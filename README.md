@@ -8,8 +8,10 @@ A simple game of asteroids made with go and raylib.
 - [Todos](#todos)
 
 ## Description
-![gameplay](./Screenshots/menu_2.png)
-![gameplay](./Screenshots/gameplay_3.png)
+The game is a simple take on the classic asteroids game. The player controls a spaceship and has to destroy asteroids to gain points. The game is over when the player runs out of lifes. The game also features powerups that can help the player destroy asteroids faster. The game is made with go and raylib. 
+I also added some features like a highscore system and reloading your weapons after a certain amount of bullets are shot.
+![gameplay](./assets/Screenshots/menu_2.png)
+![gameplay](./assets/Screenshots/gameplay_3.png)
 
 ## Installation
 - clone the repository
@@ -40,6 +42,10 @@ $ go run cmd/main.go
 - [ ] add sound effects
 - [x] highscore system
 - [x] powerups
+- [x] reload system
+- [ ] boss fights? 
+- [ ] new enemy types
+- [ ] more powerups (destroy on inpact)
 - [x] asteroid sprites
 - [x] background image 
 - [x] add lifes
