@@ -6,9 +6,9 @@ import (
 	"math/rand"
 	"os"
 
-	as "example.com/asteroids/internal/asteroids"
-	it "example.com/asteroids/internal/items"
-	pl "example.com/asteroids/internal/player"
+	as "github.com/Pazl27/Asteroids/internal/asteroids"
+	it "github.com/Pazl27/Asteroids/internal/items"
+	pl "github.com/Pazl27/Asteroids/internal/player"
 	rl "github.com/gen2brain/raylib-go/raylib"
 )
 

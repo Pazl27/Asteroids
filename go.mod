@@ -1,4 +1,4 @@
-module example.com/asteroids
+module github.com/Pazl27/Asteroids
 
 go 1.22.0
 
