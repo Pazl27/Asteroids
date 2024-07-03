@@ -118,6 +118,7 @@ func (ship *Ship) DrawAmmo() {
 	if ship.Reloading {
 		rl.DrawRectangle(10, int32(rl.GetScreenHeight()-30), 200, 20, rl.Black)
 		rl.DrawRectangle(10, int32(rl.GetScreenHeight()-30), int32(200-(time.Since(ship.reloadStart).Seconds()*50)), 20, rl.Red)
+    rl.DrawText("Reloading..", 10, int32(rl.GetScreenHeight()-50), 20, rl.White)
 	} else {
 		rl.DrawRectangle(10, int32(rl.GetScreenHeight()-30), 200, 20, rl.Black)
 		rl.DrawRectangle(10, int32(rl.GetScreenHeight()-30), int32(200-(float32(ship.Ammo)*10)), 20, rl.Red)
