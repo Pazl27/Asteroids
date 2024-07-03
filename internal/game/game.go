@@ -329,6 +329,7 @@ func loadTextures() rl.Texture2D {
 */
 func Start() {
   decodeHighScore()
+  InitMusic()
 	rl.InitWindow(ScreenWidth, ScreenHeight, "Asteroids")
   rl.SetExitKey(0)
 	defer rl.CloseWindow()
@@ -342,6 +343,7 @@ func Start() {
 	last_item_spawn_time = rl.GetTime()
 
 	for !rl.WindowShouldClose() {
+    PlayMusic()
 		if !game_running {
 			checkHighScore()
 			drawMenu()
@@ -360,6 +362,8 @@ func Start() {
 			}
 		}
 	}
+  QuitMusic()
+  // TODO: Additional cleanup 
 }
 
 

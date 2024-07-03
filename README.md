@@ -34,11 +34,13 @@ $ go run cmd/main.go
 - `A` to rotate left
 - `D` to rotate right
 - `S` to stop
+- `R` to reload
 - `Space` to shoot
 
 ## Todos
+- [ ] smoother movement
 - [x] spawn new asteroids when one is destroyed
-- [ ] add music
+- [x] add music
 - [ ] add sound effects
 - [x] highscore system
 - [x] powerups

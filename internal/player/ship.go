@@ -185,6 +185,7 @@ func (ship *Ship) UpdateShip() {
 * A - rotate left
 * D - rotate right
 * S - stop
+* R - reload
 * Space - shoot
  */
 func (ship *Ship) processInput() {
@@ -214,6 +215,11 @@ func (ship *Ship) processInput() {
 	if rl.IsKeyDown(rl.KeyS) {
 		ship.Speed = 0
 	}
+
+  if rl.IsKeyDown(rl.KeyR) {
+    ship.Reloading = true
+		ship.reloadStart = time.Now()
+  }
 
 	// Shoot a bullet
 	if ship.InfiniteAmmo && rl.IsKeyDown(rl.KeySpace) {
